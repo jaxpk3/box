@@ -1,5 +1,9 @@
+// Buscador del lado del Frontend
+
+
+
 function search() {
-  const input = document.getElementById('searchInput').value;
+  const input = document.getElementById('searchInput').value.toLowerCase(); // Convertir a minúsculas para coincidencia insensible a mayúsculas
   const resultsDiv = document.getElementById('results');
 
   if (!input) {
