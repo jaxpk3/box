@@ -8,7 +8,10 @@
 <body>
   <h1>Buscar Productos</h1>
   <div>
-    <input type="text" id="searchInput" placeholder="Introduce el nombre del producto o número de caja">
+    <label for="boxInput">Número de Caja:</label>
+    <input type="text" id="boxInput" placeholder="Introduce el número de caja">
+    <label for="productInput">Nombre del Producto:</label>
+    <input type="text" id="productInput" placeholder="Introduce el nombre del producto">
     <button onclick="search()">Buscar</button>
   </div>
   <div id="results"></div>
