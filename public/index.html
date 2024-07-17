@@ -8,13 +8,37 @@
 <body>
   <h1>Buscar Productos</h1>
   <div>
-    <label for="boxInput">Número de Caja:</label>
-    <input type="text" id="boxInput" placeholder="Introduce el número de caja">
-    <label for="productInput">Nombre del Producto:</label>
-    <input type="text" id="productInput" placeholder="Introduce el nombre del producto">
+    <input type="text" id="boxInput" placeholder="Número de caja">
+    <input type="text" id="productInput" placeholder="Nombre del producto">
     <button onclick="search()">Buscar</button>
   </div>
   <div id="results"></div>
+
+  <h2>Agregar Producto</h2>
+  <div>
+    <input type="text" id="addBox" placeholder="Número de caja">
+    <input type="text" id="addProduct" placeholder="Nombre del producto">
+    <input type="number" id="addQuantity" placeholder="Cantidad">
+    <button onclick="addProduct()">Agregar</button>
+  </div>
+  <div id="addResult"></div>
+
+  <h2>Editar Producto</h2>
+  <div>
+    <input type="text" id="editBox" placeholder="Número de caja">
+    <input type="text" id="editProduct" placeholder="Nombre del producto">
+    <input type="number" id="editQuantity" placeholder="Nueva cantidad">
+    <button onclick="editProduct()">Editar</button>
+  </div>
+  <div id="editResult"></div>
+
+  <h2>Eliminar Producto</h2>
+  <div>
+    <input type="text" id="deleteBox" placeholder="Número de caja">
+    <input type="text" id="deleteProduct" placeholder="Nombre del producto">
+    <button onclick="deleteProduct()">Eliminar</button>
+  </div>
+  <div id="deleteResult"></div>
 
   <script src="script.js"></script>
 </body>
