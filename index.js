@@ -57,30 +57,33 @@ app.get('/search/product/:name', (req, res) => {
   res.json(results);
 });
 
-// Ruta para buscar por número de caja (con búsqueda parcial)
+// Ruta para buscar por número de caja (modificada para incluir imágenes)
 app.get('/search/box/:name', (req, res) => {
-  const boxName = req.params.name.toLowerCase();
+  const boxName = req.params.name;
+  const worksheet = workbook.Sheets[boxName];
+
+  if (!worksheet) {
+    return res.status(404).json({ error: 'Caja no encontrada' });
+  }
+
+  const products = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
   let results = [];
+  let images = [];
 
-  workbook.SheetNames.forEach(sheetName => {
-    if (sheetName.toLowerCase().includes(boxName)) {
-      const worksheet = workbook.Sheets[sheetName];
-      const products = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-      for (let i = 1; i < products.length; i++) {
-        if (products[i][0]) {
-          results.push({
-            caja: sheetName,
-            producto: products[i][0],
-            cantidad: products[i][1]
-          });
-        }
-      }
+  for (let i = 1; i < products.length; i++) {
+    if (products[i][0] && products[i][0] !== 'Imágenes') {
+      results.push({
+        producto: products[i][0],
+        cantidad: products[i][1]
+      });
+    } else if (products[i][0] === 'Imágenes') {
+      images = products[i][1] ? products[i][1].split(', ') : [];
     }
-  });
+  }
 
-  res.json(results);
+  res.json({ productos: results, imagenes: images });
 });
+
 
 // Ruta para agregar un producto
 app.post('/addProduct', (req, res) => {
@@ -162,32 +165,45 @@ app.delete('/deleteProduct', (req, res) => {
 
 
 // Ruta para cargar imágenes asociadas a una caja
-app.post('/uploadImage', upload.array('images'), (req, res) => {
-  const box = req.body.caja;
-  const files = req.files;
-  const worksheet = workbook.Sheets[box];
 
+
+app.post('/uploadImage', upload.array('images', 12), (req, res) => {
+  const boxName = req.body.caja;
+  const files = req.files;
+  let imagePaths = files.map(file => `/images/${boxName}/${file.filename}`);
+
+  // Guardar las rutas de las imágenes en la hoja de cálculo
+  const worksheet = workbook.Sheets[boxName];
   if (!worksheet) {
     return res.status(404).json({ error: 'Caja no encontrada' });
   }
 
-  let imagePaths = [];
+  let imagesRow = -1;
+  const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-  if (files) {
-    files.forEach(file => {
-      imagePaths.push(file.path);
-    });
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i][0] === 'Imágenes') {
+      imagesRow = i;
+      break;
+    }
   }
 
-  // Guardar los paths de las imágenes en una columna de la hoja de cálculo
-  let lastRow = XLSX.utils.sheet_to_json(worksheet, { header: 1 }).length;
-  worksheet[`A${lastRow + 1}`] = { v: 'Imágenes' };
-  worksheet[`B${lastRow + 1}`] = { v: imagePaths.join(', ') };
+  if (imagesRow === -1) {
+    // Si no existe la fila de imágenes, agregarla al final
+    imagesRow = rows.length;
+    rows.push(['Imágenes', imagePaths.join(', ')]);
+  } else {
+    // Si existe, actualizar la fila
+    rows[imagesRow][1] = rows[imagesRow][1] ? rows[imagesRow][1] + ', ' + imagePaths.join(', ') : imagePaths.join(', ');
+  }
 
+  const newSheet = XLSX.utils.aoa_to_sheet(rows);
+  workbook.Sheets[boxName] = newSheet;
   XLSX.writeFile(workbook, './mnt/data/DB.xlsx');
 
-  res.json({ message: 'Imágenes subidas exitosamente', files });
+  res.json({ message: 'Imágenes subidas exitosamente.' });
 });
+
 
 const port = 3000;
 app.listen(port, () => {

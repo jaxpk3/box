@@ -1,4 +1,4 @@
-// Función de búsqueda (existente)
+// Función de búsqueda (modificada para incluir imágenes)
 function search() {
   const boxInput = document.getElementById('boxInput').value.trim().toLowerCase();
   const productInput = document.getElementById('productInput').value.trim().toLowerCase();
@@ -13,15 +13,25 @@ function search() {
     fetch(`/search/box/${boxInput}`)
       .then(response => response.json())
       .then(data => {
-        if (data.length === 0) {
-          resultsDiv.innerHTML = `No se encontraron cajas que coincidan con "${boxInput}".`;
+        if (data.error) {
+          resultsDiv.innerHTML = data.error;
         } else {
-          let html = `<h2>Resultados para cajas que coinciden con "${boxInput}"</h2>`;
+          let html = `<h2>Productos en la caja ${boxInput}</h2>`;
           html += '<ul>';
-          data.forEach(item => {
+          data.productos.forEach(item => {
             html += `<li>Producto: ${item.producto}, Cantidad: ${item.cantidad}</li>`;
           });
           html += '</ul>';
+
+          if (data.imagenes.length > 0) {
+            html += `<h2>Imágenes de la caja ${boxInput}</h2>`;
+            html += '<div>';
+            data.imagenes.forEach(image => {
+              html += `<img src="${image}" alt="Imagen de la caja ${boxInput}" style="max-width: 200px; margin: 5px;">`;
+            });
+            html += '</div>';
+          }
+
           resultsDiv.innerHTML = html;
         }
       });
@@ -45,17 +55,17 @@ function search() {
     fetch(`/search/box/${boxInput}`)
       .then(response => response.json())
       .then(data => {
-        if (data.length === 0) {
-          resultsDiv.innerHTML = `No se encontraron cajas que coincidan con "${boxInput}".`;
+        if (data.error) {
+          resultsDiv.innerHTML = data.error;
         } else {
           let productFound = false;
-          let html = `<h2>Resultados para cajas que coinciden con "${boxInput}" y producto "${productInput}"</h2>`;
+          let html = `<h2>Resultados para caja ${boxInput} y producto "${productInput}"</h2>`;
           let results = [];
 
-          data.forEach(box => {
-            if (box.producto.toLowerCase().includes(productInput)) {
+          data.productos.forEach(item => {
+            if (item.producto.toLowerCase().includes(productInput)) {
               productFound = true;
-              results.push(`<li>Producto: ${box.producto}, Cantidad: ${box.cantidad}</li>`);
+              results.push(`<li>Producto: ${item.producto}, Cantidad: ${item.cantidad}</li>`);
             }
           });
 
@@ -64,6 +74,16 @@ function search() {
           } else {
             html = `No se encontró el producto "${productInput}" en la caja "${boxInput}".`;
           }
+
+          if (data.imagenes.length > 0) {
+            html += `<h2>Imágenes de la caja ${boxInput}</h2>`;
+            html += '<div>';
+            data.imagenes.forEach(image => {
+              html += `<img src="${image}" alt="Imagen de la caja ${boxInput}" style="max-width: 200px; margin: 5px;">`;
+            });
+            html += '</div>';
+          }
+
           resultsDiv.innerHTML = html;
         }
       });
