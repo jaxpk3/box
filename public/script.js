@@ -3,39 +3,36 @@ function search() {
   const boxInput = document.getElementById('boxInput').value.trim().toLowerCase();
   const productInput = document.getElementById('productInput').value.trim().toLowerCase();
   const resultsDiv = document.getElementById('results');
+  const imagesContainer = document.getElementById('imagesContainer');
 
   if (!boxInput && !productInput) {
     resultsDiv.innerHTML = 'Por favor, introduce un número de caja o nombre de producto.';
     return;
   }
 
-  if (boxInput && !productInput) {
+  if (boxInput) {
     fetch(`/search/box/${boxInput}`)
       .then(response => response.json())
       .then(data => {
-        if (data.error) {
-          resultsDiv.innerHTML = data.error;
-        } else {
-          let html = `<h2>Productos en la caja ${boxInput}</h2>`;
-          html += '<ul>';
-          data.productos.forEach(item => {
-            html += `<li>Producto: ${item.producto}, Cantidad: ${item.cantidad}</li>`;
+        let html = `<h2>Productos en la caja ${boxInput}</h2>`;
+        html += '<ul>';
+        data.productos.forEach(item => {
+          html += `<li>Producto: ${item.producto}, Cantidad: ${item.cantidad}</li>`;
+        });
+        html += '</ul>';
+
+        if (data.imagenes.length > 0) {
+          html += `<h2>Imágenes de la caja ${boxInput}</h2>`;
+          html += '<div>';
+          data.imagenes.forEach(image => {
+            html += `<img src="${image}" alt="Imagen de la caja ${boxInput}">`;
           });
-          html += '</ul>';
-
-          if (data.imagenes.length > 0) {
-            html += `<h2>Imágenes de la caja ${boxInput}</h2>`;
-            html += '<div>';
-            data.imagenes.forEach(image => {
-              html += `<img src="${image}" alt="Imagen de la caja ${boxInput}" style="max-width: 200px; margin: 5px;">`;
-            });
-            html += '</div>';
-          }
-
-          resultsDiv.innerHTML = html;
+          html += '</div>';
         }
+
+        resultsDiv.innerHTML = html;
       });
-  } else if (!boxInput && productInput) {
+  } else if (productInput) {
     fetch(`/search/product/${productInput}`)
       .then(response => response.json())
       .then(data => {
@@ -55,37 +52,33 @@ function search() {
     fetch(`/search/box/${boxInput}`)
       .then(response => response.json())
       .then(data => {
-        if (data.error) {
-          resultsDiv.innerHTML = data.error;
+        let productFound = false;
+        let html = `<h2>Resultados para caja ${boxInput} y producto "${productInput}"</h2>`;
+        let results = [];
+
+        data.productos.forEach(item => {
+          if (item.producto.toLowerCase().includes(productInput)) {
+            productFound = true;
+            results.push(`<li>Producto: ${item.producto}, Cantidad: ${item.cantidad}</li>`);
+          }
+        });
+
+        if (productFound) {
+          html += '<ul>' + results.join('') + '</ul>';
         } else {
-          let productFound = false;
-          let html = `<h2>Resultados para caja ${boxInput} y producto "${productInput}"</h2>`;
-          let results = [];
-
-          data.productos.forEach(item => {
-            if (item.producto.toLowerCase().includes(productInput)) {
-              productFound = true;
-              results.push(`<li>Producto: ${item.producto}, Cantidad: ${item.cantidad}</li>`);
-            }
-          });
-
-          if (productFound) {
-            html += '<ul>' + results.join('') + '</ul>';
-          } else {
-            html = `No se encontró el producto "${productInput}" en la caja "${boxInput}".`;
-          }
-
-          if (data.imagenes.length > 0) {
-            html += `<h2>Imágenes de la caja ${boxInput}</h2>`;
-            html += '<div>';
-            data.imagenes.forEach(image => {
-              html += `<img src="${image}" alt="Imagen de la caja ${boxInput}" style="max-width: 200px; margin: 5px;">`;
-            });
-            html += '</div>';
-          }
-
-          resultsDiv.innerHTML = html;
+          html = `No se encontró el producto "${productInput}" en la caja "${boxInput}".`;
         }
+
+        if (data.imagenes.length > 0) {
+          html += `<h2>Imágenes de la caja ${boxInput}</h2>`;
+          html += '<div>';
+          data.imagenes.forEach(image => {
+            html += `<img src="${image}" alt="Imagen de la caja ${boxInput}">`;
+          });
+          html += '</div>';
+        }
+
+        resultsDiv.innerHTML = html;
       });
   }
 }
@@ -103,7 +96,7 @@ document.getElementById("productInput").addEventListener("keyup", function(event
   }
 });
 
-// Función para agregar un producto (existente)
+// Función para agregar un producto
 function addProduct() {
   const box = document.getElementById('addBox').value.trim();
   const product = document.getElementById('addProduct').value.trim();
@@ -126,7 +119,7 @@ function addProduct() {
     });
 }
 
-// Función para editar un producto (existente)
+// Función para editar un producto
 function editProduct() {
   const box = document.getElementById('editBox').value.trim();
   const product = document.getElementById('editProduct').value.trim();
@@ -149,7 +142,7 @@ function editProduct() {
     });
 }
 
-// Función para eliminar un producto (existente)
+// Función para eliminar un producto
 function deleteProduct() {
   const box = document.getElementById('deleteBox').value.trim();
   const product = document.getElementById('deleteProduct').value.trim();
@@ -174,19 +167,18 @@ function deleteProduct() {
 // Función para subir imágenes
 function uploadImages() {
   const box = document.getElementById('uploadBox').value.trim();
-  const images = document.getElementById('uploadImages').files;
-  const resultDiv = document.getElementById('uploadResult');
+  const files = document.getElementById('uploadImages').files;
+  const uploadResult = document.getElementById('uploadResult');
 
-  if (!box || images.length === 0) {
-    resultDiv.innerHTML = 'Por favor, introduce el número de caja y selecciona al menos una imagen.';
+  if (!box || files.length === 0) {
+    uploadResult.innerHTML = 'Por favor, introduce el número de caja y selecciona imágenes.';
     return;
   }
 
   const formData = new FormData();
   formData.append('caja', box);
-
-  for (let i = 0; i < images.length; i++) {
-    formData.append('images', images[i]);
+  for (let i = 0; i < files.length; i++) {
+    formData.append('images', files[i]);
   }
 
   fetch('/uploadImage', {
@@ -195,9 +187,11 @@ function uploadImages() {
   })
     .then(response => response.json())
     .then(data => {
-      resultDiv.innerHTML = data.message;
+      uploadResult.innerHTML = data.message;
+      document.getElementById('uploadBox').value = '';
+      document.getElementById('uploadImages').value = '';
     })
     .catch(error => {
-      resultDiv.innerHTML = 'Error al subir las imágenes.';
+      uploadResult.innerHTML = 'Error al subir las imágenes.';
     });
 }

@@ -1,4 +1,3 @@
-
 const express = require('express');
 const app = express();
 const XLSX = require('xlsx');
@@ -11,7 +10,18 @@ const fs = require('fs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 
+
+
+
+
+
+//Nuevo:::::::::::::::::::
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
+
+
 // Configuración de Multer para la carga de archivos
+/*REEMPLAZO ESTO
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const box = req.body.caja;
@@ -27,6 +37,23 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${file.originalname}`);
   }
 });
+*/
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dir = path.join(__dirname, 'images', req.body.caja);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+
+
 
 const upload = multer({ storage: storage });
 
@@ -68,20 +95,20 @@ app.get('/search/box/:name', (req, res) => {
 
   const products = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
   let results = [];
-  let images = [];
+  let imagePaths = [];
 
   for (let i = 1; i < products.length; i++) {
-    if (products[i][0] && products[i][0] !== 'Imágenes') {
+    if (products[i][0] === 'Imágenes') {
+      imagePaths = products[i][1].split(', ');
+    } else if (products[i][0]) {
       results.push({
         producto: products[i][0],
         cantidad: products[i][1]
       });
-    } else if (products[i][0] === 'Imágenes') {
-      images = products[i][1] ? products[i][1].split(', ') : [];
     }
   }
 
-  res.json({ productos: results, imagenes: images });
+  res.json({ productos: results, imagenes: imagePaths });
 });
 
 
@@ -166,7 +193,6 @@ app.delete('/deleteProduct', (req, res) => {
 
 // Ruta para cargar imágenes asociadas a una caja
 
-
 app.post('/uploadImage', upload.array('images', 12), (req, res) => {
   const boxName = req.body.caja;
   const files = req.files;
@@ -190,7 +216,6 @@ app.post('/uploadImage', upload.array('images', 12), (req, res) => {
 
   if (imagesRow === -1) {
     // Si no existe la fila de imágenes, agregarla al final
-    imagesRow = rows.length;
     rows.push(['Imágenes', imagePaths.join(', ')]);
   } else {
     // Si existe, actualizar la fila
@@ -203,6 +228,14 @@ app.post('/uploadImage', upload.array('images', 12), (req, res) => {
 
   res.json({ message: 'Imágenes subidas exitosamente.' });
 });
+
+
+
+
+
+
+
+
 
 
 const port = 3000;

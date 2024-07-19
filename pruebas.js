@@ -1,8 +1,8 @@
-// Función de búsqueda (modificada para incluir imágenes)
 function search() {
     const boxInput = document.getElementById('boxInput').value.trim().toLowerCase();
     const productInput = document.getElementById('productInput').value.trim().toLowerCase();
     const resultsDiv = document.getElementById('results');
+    const imagesContainer = document.getElementById('imagesContainer');
   
     if (!boxInput && !productInput) {
       resultsDiv.innerHTML = 'Por favor, introduce un número de caja o nombre de producto.';
@@ -27,7 +27,7 @@ function search() {
               html += `<h2>Imágenes de la caja ${boxInput}</h2>`;
               html += '<div>';
               data.imagenes.forEach(image => {
-                html += `<img src="${image}" alt="Imagen de la caja ${boxInput}" style="max-width: 200px; margin: 5px;">`;
+                html += `<img src="${image}" alt="Imagen de la caja ${boxInput}">`;
               });
               html += '</div>';
             }
@@ -79,7 +79,7 @@ function search() {
               html += `<h2>Imágenes de la caja ${boxInput}</h2>`;
               html += '<div>';
               data.imagenes.forEach(image => {
-                html += `<img src="${image}" alt="Imagen de la caja ${boxInput}" style="max-width: 200px; margin: 5px;">`;
+                html += `<img src="${image}" alt="Imagen de la caja ${boxInput}">`;
               });
               html += '</div>';
             }
@@ -90,100 +90,20 @@ function search() {
     }
   }
   
-  // Agregar la función para buscar al presionar Enter en cualquiera de los campos
-  document.getElementById("boxInput").addEventListener("keyup", function(event) {
-    if (event.key === "Enter") {
-      search();
-    }
-  });
-  
-  document.getElementById("productInput").addEventListener("keyup", function(event) {
-    if (event.key === "Enter") {
-      search();
-    }
-  });
-  
-  // Funciones de agregar, editar, eliminar y subir imágenes (sin cambios)
-  function addProduct() {
-    const box = document.getElementById('addBox').value.trim();
-    const product = document.getElementById('addProduct').value.trim();
-    const quantity = document.getElementById('addQuantity').value.trim();
-    const resultDiv = document.getElementById('addResult');
-  
-    fetch('/addProduct', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ caja: box, producto: product, cantidad: quantity })
-    })
-      .then(response => response.json())
-      .then(data => {
-        resultDiv.innerHTML = data.message;
-      })
-      .catch(error => {
-        resultDiv.innerHTML = 'Error al agregar el producto.';
-      });
-  }
-  
-  function editProduct() {
-    const box = document.getElementById('editBox').value.trim();
-    const product = document.getElementById('editProduct').value.trim();
-    const quantity = document.getElementById('editQuantity').value.trim();
-    const resultDiv = document.getElementById('editResult');
-  
-    fetch('/editProduct', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ caja: box, producto: product, cantidad: quantity })
-    })
-      .then(response => response.json())
-      .then(data => {
-        resultDiv.innerHTML = data.message;
-      })
-      .catch(error => {
-        resultDiv.innerHTML = 'Error al editar el producto.';
-      });
-  }
-  
-  function deleteProduct() {
-    const box = document.getElementById('deleteBox').value.trim();
-    const product = document.getElementById('deleteProduct').value.trim();
-    const resultDiv = document.getElementById('deleteResult');
-  
-    fetch('/deleteProduct', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ caja: box, producto: product })
-    })
-      .then(response => response.json())
-      .then(data => {
-        resultDiv.innerHTML = data.message;
-      })
-      .catch(error => {
-        resultDiv.innerHTML = 'Error al eliminar el producto.';
-      });
-  }
-  
   function uploadImages() {
     const box = document.getElementById('uploadBox').value.trim();
-    const images = document.getElementById('uploadImages').files;
-    const resultDiv = document.getElementById('uploadResult');
+    const files = document.getElementById('uploadImages').files;
+    const uploadResult = document.getElementById('uploadResult');
   
-    if (!box || images.length === 0) {
-      resultDiv.innerHTML = 'Por favor, introduce el número de caja y selecciona al menos una imagen.';
+    if (!box || files.length === 0) {
+      uploadResult.innerHTML = 'Por favor, introduce el número de caja y selecciona imágenes.';
       return;
     }
   
     const formData = new FormData();
     formData.append('caja', box);
-  
-    for (let i = 0; i < images.length; i++) {
-      formData.append('images', images[i]);
+    for (let i = 0; i < files.length; i++) {
+      formData.append('images', files[i]);
     }
   
     fetch('/uploadImage', {
@@ -192,10 +112,12 @@ function search() {
     })
       .then(response => response.json())
       .then(data => {
-        resultDiv.innerHTML = data.message;
+        uploadResult.innerHTML = data.message;
+        document.getElementById('uploadBox').value = '';
+        document.getElementById('uploadImages').value = '';
       })
       .catch(error => {
-        resultDiv.innerHTML = 'Error al subir las imágenes.';
+        uploadResult.innerHTML = 'Error al subir las imágenes.';
       });
   }
   

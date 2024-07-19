@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Buscar Productos</title>
+  <style>
+    #imagesContainer img {
+      max-width: 200px;
+      margin: 5px;
+    }
+  </style>
 </head>
 <body>
   <h1>Buscar Productos</h1>
@@ -12,6 +18,7 @@
     <input type="text" id="productInput" placeholder="Nombre del producto">
     <button onclick="search()">Buscar</button>
   </div>
+
   <div id="results"></div>
 
   <h2>Agregar Producto</h2>
@@ -47,6 +54,8 @@
     <button onclick="uploadImages()">Subir</button>
   </div>
   <div id="uploadResult"></div>
+
+  <div id="imagesContainer"></div>
 
   <script src="script.js"></script>
 </body>
