@@ -1,17 +1,15 @@
+// Función de búsqueda (existente)
 function search() {
   const boxInput = document.getElementById('boxInput').value.trim().toLowerCase();
   const productInput = document.getElementById('productInput').value.trim().toLowerCase();
   const resultsDiv = document.getElementById('results');
 
-  // Verificar que al menos uno de los campos esté lleno
   if (!boxInput && !productInput) {
     resultsDiv.innerHTML = 'Por favor, introduce un número de caja o nombre de producto.';
     return;
   }
 
-  // Determinar qué tipo de búsqueda realizar
   if (boxInput && !productInput) {
-    // Búsqueda por número de caja
     fetch(`/search/box/${boxInput}`)
       .then(response => response.json())
       .then(data => {
@@ -28,7 +26,6 @@ function search() {
         }
       });
   } else if (!boxInput && productInput) {
-    // Búsqueda por nombre de producto
     fetch(`/search/product/${productInput}`)
       .then(response => response.json())
       .then(data => {
@@ -45,7 +42,6 @@ function search() {
         }
       });
   } else {
-    // Búsqueda combinada
     fetch(`/search/box/${boxInput}`)
       .then(response => response.json())
       .then(data => {
@@ -87,7 +83,7 @@ document.getElementById("productInput").addEventListener("keyup", function(event
   }
 });
 
-// Función para agregar un producto
+// Función para agregar un producto (existente)
 function addProduct() {
   const box = document.getElementById('addBox').value.trim();
   const product = document.getElementById('addProduct').value.trim();
@@ -110,7 +106,7 @@ function addProduct() {
     });
 }
 
-// Función para editar un producto
+// Función para editar un producto (existente)
 function editProduct() {
   const box = document.getElementById('editBox').value.trim();
   const product = document.getElementById('editProduct').value.trim();
@@ -133,7 +129,7 @@ function editProduct() {
     });
 }
 
-// Función para eliminar un producto
+// Función para eliminar un producto (existente)
 function deleteProduct() {
   const box = document.getElementById('deleteBox').value.trim();
   const product = document.getElementById('deleteProduct').value.trim();
@@ -152,5 +148,36 @@ function deleteProduct() {
     })
     .catch(error => {
       resultDiv.innerHTML = 'Error al eliminar el producto.';
+    });
+}
+
+// Función para subir imágenes
+function uploadImages() {
+  const box = document.getElementById('uploadBox').value.trim();
+  const images = document.getElementById('uploadImages').files;
+  const resultDiv = document.getElementById('uploadResult');
+
+  if (!box || images.length === 0) {
+    resultDiv.innerHTML = 'Por favor, introduce el número de caja y selecciona al menos una imagen.';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('caja', box);
+
+  for (let i = 0; i < images.length; i++) {
+    formData.append('images', images[i]);
+  }
+
+  fetch('/uploadImage', {
+    method: 'POST',
+    body: formData
+  })
+    .then(response => response.json())
+    .then(data => {
+      resultDiv.innerHTML = data.message;
+    })
+    .catch(error => {
+      resultDiv.innerHTML = 'Error al subir las imágenes.';
     });
 }
