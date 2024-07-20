@@ -233,6 +233,29 @@ app.post('/uploadImage', upload.array('images', 12), (req, res) => {
 
 
 
+// Ruta para agregar una nueva caja
+app.post('/addBox', (req, res) => {
+  const { caja } = req.body;
+
+  if (workbook.SheetNames.includes(caja)) {
+    return res.status(400).json({ error: 'La caja ya existe' });
+  }
+
+  // Crear la estructura inicial de la caja
+  const newSheetData = [
+    ['producto', 'cantidad']
+  ];
+
+  // Agregar la nueva hoja al libro de trabajo
+  const newSheet = XLSX.utils.aoa_to_sheet(newSheetData);
+  workbook.SheetNames.push(caja);
+  workbook.Sheets[caja] = newSheet;
+
+  // Guardar el archivo de Excel
+  XLSX.writeFile(workbook, './mnt/data/DB.xlsx');
+
+  res.json({ message: 'Caja agregada exitosamente' });
+});
 
 
 

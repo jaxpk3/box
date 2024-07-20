@@ -9,6 +9,10 @@
       max-width: 200px;
       margin: 5px;
     }
+    #imagesContainer div {
+      display: inline-block;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -56,14 +60,7 @@
   <div id="uploadResult"></div>
 
   <div id="imagesContainer"></div>
-
-  <h2>Agregar Nueva Caja</h2>
-  <div>
-    <input type="text" id="newBox" placeholder="Número de nueva caja">
-    <button onclick="addBox()">Agregar Caja</button>
-  </div>
-  <div id="newBoxResult"></div>
-
+  <button onclick="deleteSelectedImages()">Eliminar Imágenes Seleccionadas</button>
 
   <script src="script.js"></script>
 </body>

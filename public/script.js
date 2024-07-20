@@ -195,3 +195,26 @@ function uploadImages() {
       uploadResult.innerHTML = 'Error al subir las imágenes.';
     });
 }
+
+
+
+// Función para agregar una nueva caja
+function addBox() {
+  const box = document.getElementById('newBox').value.trim();
+  const resultDiv = document.getElementById('newBoxResult');
+
+  fetch('/addBox', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ caja: box })
+  })
+    .then(response => response.json())
+    .then(data => {
+      resultDiv.innerHTML = data.message;
+    })
+    .catch(error => {
+      resultDiv.innerHTML = 'Error al agregar la caja.';
+    });
+}
