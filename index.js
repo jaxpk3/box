@@ -259,6 +259,13 @@ app.post('/addBox', (req, res) => {
 
 
 
+// Ruta para obtener la lista de cajas
+app.get('/boxes', (req, res) => {
+  const boxes = workbook.SheetNames;
+  res.json({ boxes });
+});
+
+
 
 
 const port = 3000;

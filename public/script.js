@@ -218,3 +218,40 @@ function addBox() {
       resultDiv.innerHTML = 'Error al agregar la caja.';
     });
 }
+
+
+
+
+// Función para mostrar/ocultar el panel de cajas
+function togglePanel() {
+  const panel = document.getElementById('panel');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    loadBoxes();
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+// Función para cargar y mostrar la lista de cajas
+function loadBoxes() {
+  fetch('/boxes')
+    .then(response => response.json())
+    .then(data => {
+      const boxList = document.getElementById('boxList');
+      boxList.innerHTML = '';
+      data.boxes.forEach(box => {
+        const li = document.createElement('li');
+        li.textContent = box;
+        boxList.appendChild(li);
+      });
+    })
+    .catch(error => {
+      console.error('Error al cargar las cajas:', error);
+    });
+}
+
+// Llamar a la función togglePanel al cargar la página
+document.addEventListener('DOMContentLoaded', togglePanel);
+
+
