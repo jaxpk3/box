@@ -252,6 +252,7 @@ function loadBoxes() {
 }
 
 // Llamar a la función togglePanel al cargar la página
-document.addEventListener('DOMContentLoaded', togglePanel);
-
+document.addEventListener('DOMContentLoaded', () => {
+  loadBoxes();
+});
 

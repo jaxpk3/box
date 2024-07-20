@@ -1,4 +1,4 @@
-
+NOTA 1
 
 hice una pagina web hecha con html, javascript y en el backend use node y que haga lo siguiente:
 1. acceder a un archivo excel llamado DB.xlsx
@@ -9,154 +9,31 @@ hice una pagina web hecha con html, javascript y en el backend use node y que ha
 
 
 
+NOTA 2
 
-index.html
+ahora quiero tener la posibilidad de poder agregar una o varias imagenes que este asociada a una caja. 
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buscar Productos</title>
-</head>
-<body>
-  <h1>Buscar Productos</h1>
-  <div>
-    <input type="text" id="searchInput" placeholder="Introduce el nombre del producto o número de caja">
-    <button onclick="search()">Buscar</button>
-  </div>
-  <div id="results"></div>
-
-  <script src="script.js"></script>
-</body>
-</html>
+NOTA 3
+ahora quiero tener la posibilidad de poder seleccionar una caja y ademas de ver los productos de la caja, tambien poder ver las imagenes asociada a esa caja.
 
 
 
-script.js
+ORGANIZACION DE LAS CARPETAS Y ARCHIVOS DE MI PROYECTO
 
-function search() {
-    const input = document.getElementById('searchInput').value;
-    const resultsDiv = document.getElementById('results');
-  
-    if (!input) {
-      resultsDiv.innerHTML = 'Por favor, introduce un nombre de producto o número de caja.';
-      return;
-    }
-  
-    // Determinar si es un producto o una caja
-    const isBox = !isNaN(input);
-  
-    if (isBox) {
-      fetch(`/search/box/${input}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.error) {
-            resultsDiv.innerHTML = data.error;
-          } else {
-            let html = `<h2>Productos en la caja ${input}</h2>`;
-            html += '<ul>';
-            data.forEach(item => {
-              html += `<li>${item.producto}: ${item.cantidad} unidades</li>`;
-            });
-            html += '</ul>';
-            resultsDiv.innerHTML = html;
-          }
-        });
-    } else {
-      fetch(`/search/product/${input}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.length === 0) {
-            resultsDiv.innerHTML = `No se encontró el producto "${input}".`;
-          } else {
-            let html = `<h2>Resultados de búsqueda para "${input}"</h2>`;
-            html += '<ul>';
-            data.forEach(item => {
-              html += `<li>Producto: ${item.producto}, Caja: ${item.caja}, Cantidad: ${item.cantidad}</li>`;
-            });
-            html += '</ul>';
-            resultsDiv.innerHTML = html;
-          }
-        });
-    }
-  }
-  
-
-
+images
+	0
+	1
+	2
+mnt
+	data
+		DB.xlsx
+public
+	index.html
+	script.js
 index.js
 
-const express = require('express');
-const app = express();
-const XLSX = require('xlsx');
-const path = require('path');
 
-// Configuración para servir archivos estáticos
-app.use(express.static(path.join(__dirname, 'public')));
-
-const workbook = XLSX.readFile('./mnt/data/DB.xlsx');
-
-// Ruta para buscar por nombre de producto
-app.get('/search/product/:name', (req, res) => {
-  const productName = req.params.name.toLowerCase();
-  let results = [];
-
-  workbook.SheetNames.forEach(sheetName => {
-    const worksheet = workbook.Sheets[sheetName];
-    const products = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-    
-    for (let i = 1; i < products.length; i++) {
-      if (products[i][0] && products[i][0].toLowerCase() === productName) {
-        results.push({
-          caja: sheetName,
-          producto: products[i][0],
-          cantidad: products[i][1]
-        });
-      }
-    }
-  });
-
-  res.json(results);
-});
-
-// Ruta para buscar por número de caja
-app.get('/search/box/:name', (req, res) => {
-  const boxName = req.params.name;
-  const worksheet = workbook.Sheets[boxName];
-
-  if (!worksheet) {
-    return res.status(404).json({ error: 'Caja no encontrada' });
-  }
-
-  const products = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  let results = [];
-
-  for (let i = 1; i < products.length; i++) {
-    if (products[i][0]) {
-      results.push({
-        producto: products[i][0],
-        cantidad: products[i][1]
-      });
-    }
-  }
-
-  res.json(results);
-});
-
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
-});
-
-
-
-
-
-
-
-
-
-
+teniendo en cunta la organizacion de los carpetas y archivos, quiero una opcion para agregar una nueva caja en ell archivo DB.xlsx (incluyendo la estructura de producto y cantidad).
 
 
 

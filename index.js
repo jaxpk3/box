@@ -259,12 +259,19 @@ app.post('/addBox', (req, res) => {
 
 
 
+
 // Ruta para obtener la lista de cajas
 app.get('/boxes', (req, res) => {
-  const boxes = workbook.SheetNames;
+  let boxes = workbook.SheetNames;
+
+  // Filtrar solo cajas con nombres numéricos y ordenar numéricamente
+  boxes = boxes
+    .filter(box => !isNaN(box))
+    .map(box => parseInt(box, 10))
+    .sort((a, b) => a - b);
+
   res.json({ boxes });
 });
-
 
 
 
